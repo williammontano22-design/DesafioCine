@@ -2,7 +2,12 @@
 
 import React from "react";
 
-export type VistaActual = "dashboard" | "reservas" | "agregar" | "catalogo";
+export type VistaActual =
+  | "dashboard"
+  | "reservas"
+  | "historial"
+  | "agregar"
+  | "catalogo";
 
 interface Props {
   vistaActual: VistaActual;
@@ -13,7 +18,7 @@ export const Navbar: React.FC<Props> = ({ vistaActual, setVistaActual }) => {
   return (
     <header style={headerStyle}>
       <div style={logoStyle}>
-        <span>CinePolito</span>
+        🎬 <span>CinePolito</span>
       </div>
 
       <nav style={navStyle}>
@@ -24,7 +29,7 @@ export const Navbar: React.FC<Props> = ({ vistaActual, setVistaActual }) => {
             ...(vistaActual === "dashboard" ? btnActiveStyle : {}),
           }}
         >
-          Dashboard
+          📊 Dashboard
         </button>
 
         <button
@@ -34,7 +39,17 @@ export const Navbar: React.FC<Props> = ({ vistaActual, setVistaActual }) => {
             ...(vistaActual === "reservas" ? btnActiveStyle : {}),
           }}
         >
-          Reservas
+          🎟️ Reservas
+        </button>
+
+        <button
+          onClick={() => setVistaActual("historial")}
+          style={{
+            ...btnTabStyle,
+            ...(vistaActual === "historial" ? btnActiveStyle : {}),
+          }}
+        >
+          📜 Historial Ventas
         </button>
 
         <button
@@ -44,7 +59,7 @@ export const Navbar: React.FC<Props> = ({ vistaActual, setVistaActual }) => {
             ...(vistaActual === "agregar" ? btnActiveStyle : {}),
           }}
         >
-          Agregar Película
+          ➕ Agregar Película
         </button>
 
         <button
@@ -54,7 +69,7 @@ export const Navbar: React.FC<Props> = ({ vistaActual, setVistaActual }) => {
             ...(vistaActual === "catalogo" ? btnActiveStyle : {}),
           }}
         >
-          Catálogo
+          🎬 Catálogo
         </button>
       </nav>
     </header>

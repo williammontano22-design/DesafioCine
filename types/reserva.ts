@@ -10,7 +10,7 @@ export interface Reserva {
   nombrePelicula: string;
   sala: string;
   funcionHorario: string;
-  asientosReservados: string[]; // Ej: ["A1", "A2"]
+  asientosReservados: string[];
   cliente: Cliente;
   totalPagar: number;
   fechaCompra: string;

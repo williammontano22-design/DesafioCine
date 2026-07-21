@@ -10,16 +10,16 @@ export type EstadoPelicula = "Disponible" | "No disponible";
 
 export interface Funcion {
   id: string;
-  horario: string; // Ej: "14:30", "18:00"
+  horario: string;
 }
 
 export interface Pelicula {
-  codigo: string; // Código único
+  codigo: string;
   nombre: string;
   genero: GeneroPelicula;
   duracion: number; // En minutos
   clasificacion: ClasificacionPelicula;
-  salaAsignada: string; // Ej: "Sala 1", "Sala 2"
+  salaAsignada: string;
   precioEntrada: number;
   estado: EstadoPelicula;
   funciones: Funcion[];
