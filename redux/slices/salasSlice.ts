@@ -90,7 +90,6 @@ export const salasSlice = createSlice({
   },
 });
 
-// ⚠️ AQUÍ EXPORTAMOS LAS ACCIONES
 export const { seleccionarAsiento, confirmarReservaEnSala } =
   salasSlice.actions;
 

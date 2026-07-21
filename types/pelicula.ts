@@ -17,11 +17,11 @@ export interface Pelicula {
   codigo: string;
   nombre: string;
   genero: GeneroPelicula;
-  duracion: number; // En minutos
+  duracion: number;
   clasificacion: ClasificacionPelicula;
   salaAsignada: string;
   precioEntrada: number;
   estado: EstadoPelicula;
-  funciones: Funcion[];
-  imagenUrl?: string;
+  funciones: { id: string; horario: string }[];
+  imagen?: string;
 }

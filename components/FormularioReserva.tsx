@@ -26,11 +26,11 @@ export const FormularioReserva: React.FC = () => {
   // Película elegida
   const peliculaActual = peliculas.find((p) => p.codigo === peliculaCodigo);
 
-  // Sala asignada a la película
+  // Sala asignada
   const salaActual =
     salas.find((s) => s.nombre === peliculaActual?.salaAsignada) || salas[0];
 
-  // Asientos seleccionados actualmente por el usuario
+  // Asientos seleccionados
   const asientosSeleccionados = salaActual
     ? salaActual.asientos.filter((a) => a.estado === "seleccionado")
     : [];
@@ -39,6 +39,9 @@ export const FormularioReserva: React.FC = () => {
     (acc, a) => acc + a.precio,
     0,
   );
+
+  // Expresión Regular para Email
+  const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const handleComprar = (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,12 +57,18 @@ export const FormularioReserva: React.FC = () => {
       return;
     }
 
-    if (
-      !nombreCliente.trim() ||
-      !emailCliente.trim() ||
-      !telefonoCliente.trim()
-    ) {
-      setError("Por favor completa todos los datos del cliente.");
+    if (!nombreCliente.trim()) {
+      setError("Por favor ingresa el nombre del cliente.");
+      return;
+    }
+
+    if (!regexEmail.test(emailCliente.trim())) {
+      setError("Por favor ingresa un correo electrónico válido.");
+      return;
+    }
+
+    if (telefonoCliente.length !== 8) {
+      setError("El número de teléfono debe contener exactamente 8 dígitos.");
       return;
     }
 
@@ -80,10 +89,8 @@ export const FormularioReserva: React.FC = () => {
       fechaCompra: new Date().toLocaleDateString("es-SV"),
     };
 
-    // 1. Guardar la reserva en el historial de Redux
     dispatch(agregarReserva(nuevaReserva));
 
-    // 2. Marcar los asientos como Ocupados permanentemente en la sala
     dispatch(
       confirmarReservaEnSala({
         salaId: salaActual.id,
@@ -91,11 +98,10 @@ export const FormularioReserva: React.FC = () => {
       }),
     );
 
-    alert(`🎉 ¡Reserva realizada con éxito!
-Código: ${nuevaReserva.id}
-Total a pagar: $${totalPagar.toFixed(2)}`);
+    alert(
+      `Reserva realizada con éxito\nCódigo: ${nuevaReserva.id}\nTotal a pagar: $${totalPagar.toFixed(2)}`,
+    );
 
-    // Limpiar formulario
     setNombreCliente("");
     setEmailCliente("");
     setTelefonoCliente("");
@@ -103,23 +109,64 @@ Total a pagar: $${totalPagar.toFixed(2)}`);
 
   return (
     <div style={containerStyle}>
-      <h2 style={{ marginTop: 0, color: "#0f172a" }}>
-        🎟️ Reservar Boletos de Cine
-      </h2>
+      <div style={headerStyle}>
+        <h2 style={{ margin: 0, fontSize: "18px", fontWeight: "bold" }}>
+          Reservar Boletos de Cine
+        </h2>
+        <p style={{ margin: "4px 0 0 0", fontSize: "13px", color: "#94a3b8" }}>
+          Seleccione la película, el horario y sus asientos correspondientes.
+        </p>
+      </div>
 
       {error && <div style={errorStyle}>{error}</div>}
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-          gap: "20px",
-        }}
-      >
-        {/* Selección de Película y Horario */}
+      <div style={contentGridStyle}>
+        {/* Columna Izquierda: Formulario + Poster de Película */}
         <div>
+          {/* Ficha rápida con Imagen de la Película */}
+          {peliculaActual && (
+            <div style={posterCardStyle}>
+              <div style={posterImageContainerStyle}>
+                <img
+                  src={
+                    peliculaActual.imagen ||
+                    "https://via.placeholder.com/300x400?text=Sin+Imagen"
+                  }
+                  alt={peliculaActual.nombre}
+                  style={posterImageStyle}
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <h3
+                  style={{
+                    margin: "0 0 4px 0",
+                    fontSize: "16px",
+                    color: "#0f172a",
+                  }}
+                >
+                  {peliculaActual.nombre}
+                </h3>
+                <p
+                  style={{
+                    margin: "0 0 4px 0",
+                    fontSize: "13px",
+                    color: "#64748b",
+                  }}
+                >
+                  <strong>Género:</strong> {peliculaActual.genero} |{" "}
+                  <strong>Clasificación:</strong> {peliculaActual.clasificacion}
+                </p>
+                <p style={{ margin: 0, fontSize: "13px", color: "#64748b" }}>
+                  <strong>Duración:</strong> {peliculaActual.duracion} min |{" "}
+                  <strong>Precio base:</strong> $
+                  {peliculaActual.precioEntrada.toFixed(2)}
+                </p>
+              </div>
+            </div>
+          )}
+
           <div style={{ marginBottom: "15px" }}>
-            <label style={labelStyle}>Película</label>
+            <label style={labelStyle}>Seleccionar Película</label>
             <select
               value={peliculaCodigo}
               onChange={(e) => setPeliculaCodigo(e.target.value)}
@@ -148,9 +195,10 @@ Total a pagar: $${totalPagar.toFixed(2)}`);
             </select>
           </div>
 
-          {/* Formulario Cliente */}
-          <h4 style={{ color: "#0f172a", marginBottom: "10px" }}>
-            👤 Datos del Cliente
+          <h4
+            style={{ color: "#0f172a", marginBottom: "10px", fontSize: "14px" }}
+          >
+            Datos del Cliente
           </h4>
           <div
             style={{ display: "flex", flexDirection: "column", gap: "10px" }}
@@ -164,27 +212,36 @@ Total a pagar: $${totalPagar.toFixed(2)}`);
             />
             <input
               type="email"
-              placeholder="Correo electrónico"
+              placeholder="Correo electrónico (ej: usuario@gmail.com)"
               value={emailCliente}
               onChange={(e) => setEmailCliente(e.target.value)}
               style={inputStyle}
             />
             <input
               type="tel"
-              placeholder="Teléfono"
+              placeholder="Teléfono (8 dígitos)"
               value={telefonoCliente}
-              onChange={(e) => setTelefonoCliente(e.target.value)}
+              maxLength={8}
+              onChange={(e) => {
+                const soloNumeros = e.target.value.replace(/\D/g, "");
+                setTelefonoCliente(soloNumeros);
+              }}
               style={inputStyle}
             />
           </div>
 
-          {/* Resumen de Compra */}
           <div style={resumenStyle}>
-            <p style={{ margin: "4px 0", fontSize: "14px", color: "#334155" }}>
+            <p style={{ margin: "4px 0", fontSize: "13px", color: "#334155" }}>
               <strong>Asientos seleccionados:</strong>{" "}
               {asientosSeleccionados.map((a) => a.id).join(", ") || "Ninguno"}
             </p>
-            <h3 style={{ margin: "10px 0 0 0", color: "#16a34a" }}>
+            <h3
+              style={{
+                margin: "8px 0 0 0",
+                color: "#16a34a",
+                fontSize: "18px",
+              }}
+            >
               Total: ${totalPagar.toFixed(2)}
             </h3>
           </div>
@@ -194,43 +251,85 @@ Total a pagar: $${totalPagar.toFixed(2)}`);
           </button>
         </div>
 
-        {/* Mapa Interactivo de Asientos */}
+        {/* Columna Derecha: Mapa de Asientos */}
         <div>{salaActual && <MapaAsientos salaId={salaActual.id} />}</div>
       </div>
     </div>
   );
 };
 
+// Estilos
 const containerStyle: React.CSSProperties = {
   backgroundColor: "#ffffff",
-  padding: "20px",
-  borderRadius: "10px",
+  borderRadius: "8px",
   boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-  margin: "20px",
+  overflow: "hidden",
+  margin: "20px 0",
+  border: "1px solid #e2e8f0",
+};
+
+const headerStyle: React.CSSProperties = {
+  backgroundColor: "#0f172a",
+  color: "#ffffff",
+  padding: "16px 24px",
+};
+
+const contentGridStyle: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+  gap: "24px",
+  padding: "24px",
+};
+
+const posterCardStyle: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "16px",
+  backgroundColor: "#f8fafc",
+  padding: "12px",
+  borderRadius: "8px",
+  border: "1px solid #e2e8f0",
+  marginBottom: "15px",
+};
+
+const posterImageContainerStyle: React.CSSProperties = {
+  width: "80px",
+  height: "110px",
+  borderRadius: "6px",
+  overflow: "hidden",
+  backgroundColor: "#cbd5e1",
+  flexShrink: 0,
+};
+
+const posterImageStyle: React.CSSProperties = {
+  width: "100%",
+  height: "100%",
+  objectFit: "cover",
 };
 
 const labelStyle: React.CSSProperties = {
   display: "block",
-  fontSize: "13px",
+  fontSize: "12px",
   fontWeight: "bold",
-  color: "#475569",
+  color: "#334155",
   marginBottom: "5px",
 };
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
-  padding: "10px",
+  padding: "8px 12px",
   borderRadius: "6px",
   border: "1px solid #cbd5e1",
   boxSizing: "border-box",
+  fontSize: "13px",
   color: "#0f172a",
   backgroundColor: "#ffffff",
 };
 
 const resumenStyle: React.CSSProperties = {
   backgroundColor: "#f8fafc",
-  padding: "15px",
-  borderRadius: "8px",
+  padding: "12px",
+  borderRadius: "6px",
   border: "1px solid #e2e8f0",
   marginTop: "15px",
 };
@@ -244,18 +343,17 @@ const btnComprarStyle: React.CSSProperties = {
   cursor: "pointer",
   fontWeight: "bold",
   width: "100%",
-  fontSize: "16px",
+  fontSize: "15px",
   marginTop: "15px",
 };
 
 const errorStyle: React.CSSProperties = {
   backgroundColor: "#fef2f2",
   color: "#dc2626",
-  padding: "10px",
-  borderRadius: "6px",
-  marginBottom: "15px",
+  padding: "12px 24px",
   fontSize: "14px",
-  border: "1px solid #fecaca",
+  borderBottom: "1px solid #fecaca",
+  fontWeight: "bold",
 };
 
 export default FormularioReserva;
