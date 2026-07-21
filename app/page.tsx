@@ -1,9 +1,15 @@
+"use client";
+
+import { useState } from "react";
+import Navbar, { VistaActual } from "@/components/navbar";
 import Dashboard from "@/components/Dashboard";
+import FormularioReserva from "@/components/FormularioReserva";
 import FormularioPelicula from "@/components/FormularioPelicula";
 import TablaPeliculas from "@/components/TablaPeliculas";
-import FormularioReserva from "@/components/FormularioReserva";
 
 export default function Home() {
+  const [vistaActual, setVistaActual] = useState<VistaActual>("dashboard");
+
   return (
     <main
       style={{
@@ -12,10 +18,16 @@ export default function Home() {
         paddingBottom: "40px",
       }}
     >
-      <Dashboard />
-      <FormularioReserva />
-      <FormularioPelicula />
-      <TablaPeliculas />
+      {/* Barra de navegación superior */}
+      <Navbar vistaActual={vistaActual} setVistaActual={setVistaActual} />
+
+      {/* Renderizado condicional según la pestaña seleccionada */}
+      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "10px" }}>
+        {vistaActual === "dashboard" && <Dashboard />}
+        {vistaActual === "reservas" && <FormularioReserva />}
+        {vistaActual === "agregar" && <FormularioPelicula />}
+        {vistaActual === "catalogo" && <TablaPeliculas />}
+      </div>
     </main>
   );
 }
