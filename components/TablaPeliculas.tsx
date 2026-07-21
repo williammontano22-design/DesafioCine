@@ -3,19 +3,50 @@
 import React, { useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { editarPelicula } from "@/redux/slices/peliculasSlice";
-import {
-  Pelicula,
-  GeneroPelicula,
-  ClasificacionPelicula,
-} from "@/types/pelicula";
+import { Pelicula, GeneroPelicula } from "@/types/pelicula";
 import PeliculaFila from "./PeliculaFila";
+import Buscador from "./Buscador";
+import Filtros from "./Filtros";
 
 export const TablaPeliculas: React.FC = () => {
   const dispatch = useAppDispatch();
-  const peliculas = useAppSelector((state) => state.peliculas.lista);
+  const {
+    lista,
+    busqueda,
+    filtroGenero,
+    filtroClasificacion,
+    filtroSala,
+    filtroEstado,
+  } = useAppSelector((state) => state.peliculas);
 
-  // Estado para la película que se está editando
   const [peliculaAEditar, setPeliculaAEditar] = useState<Pelicula | null>(null);
+
+  // 🎯 Lógica de Filtrado y Búsqueda combinada
+  const peliculasFiltradas = lista.filter((p) => {
+    const coincideBusqueda =
+      p.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
+      p.genero.toLowerCase().includes(busqueda.toLowerCase()) ||
+      p.clasificacion.toLowerCase().includes(busqueda.toLowerCase()) ||
+      p.salaAsignada.toLowerCase().includes(busqueda.toLowerCase());
+
+    const coincideGenero =
+      filtroGenero === "Todos" || p.genero === filtroGenero;
+    const coincideClasificacion =
+      filtroClasificacion === "Todos" ||
+      p.clasificacion === filtroClasificacion;
+    const coincideSala =
+      filtroSala === "Todas" || p.salaAsignada === filtroSala;
+    const coincideEstado =
+      filtroEstado === "Todos" || p.estado === filtroEstado;
+
+    return (
+      coincideBusqueda &&
+      coincideGenero &&
+      coincideClasificacion &&
+      coincideSala &&
+      coincideEstado
+    );
+  });
 
   const handleGuardarEdicion = (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,9 +63,13 @@ export const TablaPeliculas: React.FC = () => {
         🎬 Catálogo de Películas
       </h2>
 
-      {peliculas.length === 0 ? (
-        <p style={{ color: "#64748b" }}>
-          No hay películas registradas en el sistema.
+      {/* 🔍 Buscador y Filtros */}
+      <Buscador />
+      <Filtros />
+
+      {peliculasFiltradas.length === 0 ? (
+        <p style={{ color: "#64748b", textAlign: "center", padding: "20px 0" }}>
+          No se encontraron películas que coincidan con la búsqueda o filtros.
         </p>
       ) : (
         <div style={{ overflowX: "auto" }}>
@@ -65,7 +100,7 @@ export const TablaPeliculas: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {peliculas.map((p) => (
+              {peliculasFiltradas.map((p) => (
                 <PeliculaFila
                   key={p.codigo}
                   pelicula={p}
@@ -77,7 +112,7 @@ export const TablaPeliculas: React.FC = () => {
         </div>
       )}
 
-      {/* Modal / Formulario flotante de Edición */}
+      {/* Modal de Edición */}
       {peliculaAEditar && (
         <div style={modalOverlayStyle}>
           <div style={modalContentStyle}>
