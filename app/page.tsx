@@ -1,5 +1,6 @@
 import Dashboard from "@/components/Dashboard";
 import FormularioPelicula from "@/components/FormularioPelicula";
+import TablaPeliculas from "@/components/TablaPeliculas";
 
 export default function Home() {
   return (
@@ -12,6 +13,7 @@ export default function Home() {
     >
       <Dashboard />
       <FormularioPelicula />
+      <TablaPeliculas />
     </main>
   );
 }
